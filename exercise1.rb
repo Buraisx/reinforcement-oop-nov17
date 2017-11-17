@@ -19,8 +19,3 @@ class Task
 	end
 end
 
-sometask = Task.new
-sometask.description= "this is a new task"
-puts sometask.description
-sometask.due_date="10/10/1995"
-puts sometask.due_date
