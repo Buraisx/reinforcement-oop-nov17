@@ -98,5 +98,6 @@ puts walle.no_lecture_on(start_date)
 christmas = Date.new(2017,12,25)
 puts walle.double_check_holiday(christmas)
 puts walle.class_days
-
-
+puts walle.weeks_of_cohort.inspect
+puts walle.coffee_code_day?(Date.new(2018,11,21))
+puts walle.coffee_code_days
