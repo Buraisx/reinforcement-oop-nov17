@@ -1,21 +1,102 @@
-class Task
-	def initialize
-		@description = ""
-		@due_date = ""
-	end
+require 'date'
+require 'active_support'
+require 'active_support/core_ext'
+require 'holidays'
 
-	def description=(desc)
-		@description = desc		
-	end
+class Cohort
 
-	def description
-		@description
-	end
-	def due_date=(due)
-		@due_date = due
-	end
-	def due_date
-		@due_date
-	end
+  FIRST_COFFEE_CODE_WEEK = 3
+  LAST_COFFEE_CODE_WEEK = 10 
+  WEEKS_IN_COHORT = 10 
+
+
+  def initialize(first_day)
+    @first_day = first_day
+  end
+
+  def last_day
+    @first_day + (WEEKS_IN_COHORT - 1).weeks + 4.days
+  end
+
+  def no_lecture_on(day)
+    day.saturday? || day.sunday? || day.to_date == Date.new(2017,07,03) || double_check_holiday(day)
+  end
+
+  def double_check_holiday(day)
+    potential_holidays = Holidays.on(day, :ca_on)
+
+    if potential_holidays.any?
+      potential_holidays.each do |h|
+        print "Are you taking #{h} off? y/N: "
+        answer = gets.chomp
+        if answer.downcase == 'y'
+          return true
+        end
+      end
+    end
+
+    return false
+  end
+
+  def class_days
+    @class_days ||= []
+
+    if @class_days.empty?
+      (@first_day..last_day).each do |day|
+        unless no_lecture_on(day) 
+          @class_days << day
+        end
+      end
+    end
+
+    return @class_days
+  end
+
+  def weeks_of_cohort
+    (@first_day..last_day).each_slice(7)
+  end
+
+  def week_of(day)
+    week_number = 1
+    weeks_of_cohort.each do |week|
+      if week.include?(day)
+        return week_number
+      end
+
+      week_number += 1
+    end
+
+    return nil
+  end
+
+  def coffee_code_day?(day)
+    day.tuesday? || day.thursday?
+  end
+
+  def coffee_code_week?(day)
+    week_of(day).between?(FIRST_COFFEE_CODE_WEEK, LAST_COFFEE_CODE_WEEK)
+  end
+
+  def coffee_code_days
+    list = []
+
+    class_days.each do |day|
+      if coffee_code_week?(day) && coffee_code_day?(day)
+        list << day
+      end
+    end
+
+    return list
+  end
+
 end
+
+start_date = Date.new(2017,10,23)
+walle = Cohort.new(start_date)
+puts walle.last_day
+puts walle.no_lecture_on(start_date)
+christmas = Date.new(2017,12,25)
+puts walle.double_check_holiday(christmas)
+puts walle.class_days
+
 
